@@ -1,0 +1,181 @@
+---
+title: "Questions pré et post formation"
+author: "JcB"
+date: "10/11/2014"
+output:
+  pdf_document:
+    number_sections: yes
+    toc: yes
+---
+
+```{r init, echo=FALSE}
+file <- "data/prepost.csv"
+d <- read.csv(file)
+```
+Les données initiales sont reformulées pour obtenir une présentation conforme pour l'analyse. Le début du fichier nettoyé se présente ainsi:
+```{r tidy, echo=FALSE, comment=""}
+names(d)
+
+head(d)
+```
+
+- colonnes 1 à 5 sont les variables qualitatives:
+
+    - __date__ date de la formation (le jour est arbitraire)
+    - __groupe__ groupe d'apprenant (1 = 1er groupe, 2 = second)
+    - __no__ numéro de l'apprenant dans le groupe
+    - __CSP__ catégorie socio-professionnelle (AS et IDE)
+    - __exam__ période du test (pré = pré-test, post = post-test)
+    
+- colonnes 6 à 15 sont les notes (variable qualitatives)
+
+- les colonnes 7 à 15 comptent les réponses à 9 questions dichotomiques, valant 0 (réponse fausse) ou 1 (réponse juste). Le score maximal est de 9 points.
+
+- La colonne 6 compte le nombre de réponses fausse à une question formée de 7 items. Le nombre de fautes possibles varie de 0 à 7. On considère qu'une réponse juste vaut 1 point. Le score maximum est de 7 points. On normalise le score sur 11 points, de sorte que la note maximale pour l'ensemble des questions soit de 20 (11 + 9).
+
+formule de normalisation: note = (7 - f) x 11 / 7 où f = nombre de réponses fausses.
+
+```{r menage, echo=FALSE}
+
+# str(d)
+
+# transformation en facteur
+d$groupe <- as.factor(d$groupe)
+
+# création d'une colonne groupe:
+d$note <- apply(d[, 7:15],1, sum) + 11*(7-d$q2)/7
+
+# partition
+g1.pre <- d[d$exam == "pre" & d$groupe == 1,]   # groupe 1 pre
+g2.pre <- d[d$exam == "pre" & d$groupe == 2,]
+
+g1.post <- d[d$exam == "post" & d$groupe == 1,] # groupe 1 post
+g2.post <- d[d$exam == "post" & d$groupe == 2,] # groupe 2 post
+
+g1 <- d[d$groupe == 1,] # groupe 1 (2 sessions)
+g2 <- d[d$groupe == 2,] # groupe 2
+```
+
+Résultats
+=========
+
+Comparaison de la note moyenne obtenue aux tests pour les 2 groupes
+-------------------------------------------------------------------
+
+```{r, echo=FALSE, comment=""}
+tapply(d$note, d$exam, mean)
+```
+La note moyenne progresse fortement entre le début et la fin de la formation et cette différence est statistiquement significative:
+```{r, echo=FALSE, comment=""}
+t.test(d$note[d$exam=="pre"], d$note[d$exam=="post"])
+```
+On trouve la même progression dans les deux groupes:
+
+- groupe 1
+```{r, echo=FALSE}
+tapply(g1$note, g1$exam, mean)
+```
+
+- groupe 2
+```{r, echo=FALSE}
+tapply(g2$note, g2$exam, mean)
+```
+
+
+#### aspect graphique
+
+
+```{r graphe_groupes, echo=FALSE}
+# boxplot des 2 groupes
+boxplot(g1.pre$note, g1.post$note, g2.pre$note, g2.post$note, names=c("G1\npré-test", "G1\npost-test", "G2\npré-test", "G2\npost-test"), col=c(2,2,3,3), main = "Notes des 2 groupes aux pré et post-tests", ylab = "Note sur 20")
+```
+
+Le groupe 2 apparait un peu plus dispersé au pré-test (l'écart entre la meilleure et la plus mauvaise note est plus grand dans le groupe 2). Cependant sur le plan statistique, il n'y a pas de différence entre les deux groupes:
+
+```{r, echo=FALSE, comment=""}
+t.test(g1.pre$note, g2.pre$note) # pas de différence entre les 2 groupes
+```
+Après la formation, les deux groupes ont fortement progressé. La différence de notes en le pré-test et le post-test est fortement significative au test de comparaison des moyennes avant-après:
+
+- pour le 1er groupe:
+
+```{r, echo=FALSE, comment=""}
+t.test(g1.pre$note, g1.post$note, paired=TRUE) # forte différence
+```
+
+- pour le deuxième:
+
+```{r, echo=FALSE, comment=""}
+t.test(g1.post$note, g2.post$note) # pas de différence entre les 2 groupes
+```
+
+Au final les deux groupes ont progressé et il n'y a pas de différence entre les notes au post-test:
+
+```{r, echo=FALSE, comment=""}
+t.test(g2.pre$note, g2.post$note, paired=TRUE) # différence entre les groupes
+```
+
+
+
+Analyse par groupe socio-professionnel
+--------------------------------------
+
+Question: y a t_il une différence entre les AS et les IDE dans les résultats des tests avant/après ?
+
+```{r csp, echo=FALSE, comment=""}
+# groupe socio-professionnels
+
+as.pre <- d[d$CSP == "AS" & d$exam == "pre",]
+as.post <- d[d$CSP == "AS" & d$exam == "post",]
+ide.pre <- d[d$CSP == "IDE" & d$exam == "pre",]
+ide.post <- d[d$CSP == "IDE" & d$exam == "post",]
+```
+
+Le niveau de connaissance évalué par le pré-test est-il le même pour las AS et les IDE ?
+
+```{r, echo=FALSE, comment=""}
+t.test(as.pre$note, ide.pre$note)
+```
+
+La valeur de _p_ très inférieure à 0.05 fait rejeter cette hypothèse. Las AS réussissent moins bien le pré-test.
+
+Le niveau atteint en fin de formation (évalué par le post-test) est-il équivalent pour les 2 professions ?
+
+```{r, echo=FALSE, comment=""}
+
+# cette différence persiste après la formation.
+t.test(as.post$note, ide.post$note)
+```
+
+La valeur de _p_ très inférieure à 0.05 fait rejeter cette hypothèse.
+
+#### Résultat graphique
+
+```{r graphe, echo=FALSE, comment=""}
+boxplot(as.pre$note, as.post$note, ide.pre$note, ide.post$note, names=c("AS\npré-test", "AS\npost-test", "IDE\npré-test", "IDE\npost-test"), col=c(4,4,5,5), main="Notes aux tests - Comparaison AS - IDE", ylab = "Note sur 20")
+```
+
+Graphiquement on note que les 2 groupes progressent, les AS davantage que les IDE. Les AS atteignent au post-test le niveau des IDE au pré-test. On note qu'ne AS est très bien notée au pré-test (17/20) et qu'une IDE est très mal notée (5/20).
+
+La progression est statistiquement significative pour les deux professions:
+
+pour les AS:
+
+```{r, echo=FALSE, comment=""}
+t.test(as.pre$note, as.post$note, paired=TRUE)
+```
+
+pour les IDE:
+
+```{r, echo=FALSE, comment=""}
+t.test(ide.pre$note, ide.post$note, paired=TRUE)
+```
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,60 @@
+---
+title: "Questionnaire à distanc"
+author: "JcB"
+date: "09/11/2014"
+output:
+  html_document:
+    fig_caption: yes
+    keep_md: yes
+---
+
+```{r test, comment="", warning=FALSE}
+
+library("likert")
+library(reshape)
+
+file <- "data/qestionnaire_distance.csv"
+d <- read.csv(file)
+
+# on fait une copie sans a colonne 1 qui ne sert à rien
+d2 <- d[,-1]
+
+likert(d2, nlevels = 8)
+
+# on fait une copie de d2 et on modifiel'intitulé de colonnes pour qu'il corresponde à celui des questions
+d3 <- d2
+
+d3 <- rename(d3, c(
+    q1="Je garde un bon souvenir de la formation", 
+    q2="Je conseille à mes collègues de suivre cette formation", 
+    q3="Je connais le numéro d’appel d’urgence", 
+    q4="je connais les informations utiles à transmettre au médecin", 
+    q5="je sais utiliser le matériel du chariot d’urgence", 
+    q6="Je connais les médicaments du chariot d’urgence", 
+    q7="Je peux donner l’indication du défibrillateur automatisé externe", 
+    q8="Je peux prendre en charge un arrêt cardio-respiratoire", 
+    q9="Je connais le matériel à préparer pour une intubation", 
+    q10="Je sais mettre en place une oxygénothérapie", 
+    q11="Je sais comment agir lors d’une hémorragie externe", 
+    q12="Je me sers des acquis de la formation dans ma pratique", 
+    q13="Je pense que j’arrive à prioriser les actions", 
+    q14="je sais expliquer l'IDM", 
+    q15="je sais expliquer l'OAP", 
+    q16="je sais expliquer l'insuffisance cardiaque"))
+
+likert(d3, nlevels = 8)
+# plot(likert(d3, nlevels = 8))
+l <- likert(d3, nlevels = 8)
+summary(l)
+
+likert.histogram.plot(l, label.completed = "complet", label.missing = "manqant")
+
+likert.heat.plot(l, text.size = 2.5)
+
+likert.density.plot(l)
+
+l = likert(d, nlevels = 8)
+plot(l)
+likert.heat.plot(l)
+```
+
