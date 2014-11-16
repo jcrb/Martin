@@ -2,6 +2,12 @@
 JcB  
 09/11/2014  
 
+L'analyse suivante exploite la librairie __Likert__. On trouve une aide à son utilisation aux adresses suivantes:
+
+- CESU/cours stat/Likert (+++)
+- voir aussi la package __HH__ (pages 71 à 91)
+- https://github.com/jbryer/likert/blob/master/demo/likert.R
+
 
 ```r
 library("likert")
@@ -162,7 +168,7 @@ summary(l)
 ```
 
 ```r
-likert.histogram.plot(l, label.completed = "complet", label.missing = "manqant")
+likert.histogram.plot(l, label.completed = "complet", label.missing = "manqant", xlab="nombre de réponses")
 ```
 
 ![](./questionaire_distance_files/figure-html/test-1.png) 
@@ -179,16 +185,12 @@ likert.density.plot(l)
 
 ![](./questionaire_distance_files/figure-html/test-3.png) 
 
-```r
-l = likert(d, nlevels = 8)
-plot(l)
-```
+Rotation image
+--------------
 
-![](./questionaire_distance_files/figure-html/test-4.png) 
+#### utilisation de heat plot
 
-```r
-likert.heat.plot(l)
-```
 
-![](./questionaire_distance_files/figure-html/test-5.png) 
+
+<img src="./questionaire_distance_files/figure-html/rot-1.png" title="" alt="" angle=90 /><img src="./questionaire_distance_files/figure-html/rot-2.png" title="" alt="" angle=90 />
 

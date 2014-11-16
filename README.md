@@ -1,6 +1,8 @@
 Martin
 ======
 
+Contact: nathalie.martin1@chru-strasbourg.fr et nath.martin@hotmail.fr (adresse préférée)
+
 2014-11-07
 ----------
 Comme convenu hier lors de notre rapide entrevue je vous fais parvenir le questionnaire pré et post formation ainsi que le questionnaire à distance. Les noms des participants sont référencés pour le premier alors que le second reste sous couvert d’anonymat.
